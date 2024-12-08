@@ -1,0 +1,63 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - ".github/test.yaml"
+      - "requirements.txt"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: "./src"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          [
+            "windows-py312",
+            "macos-py311",
+            "macos-py312",
+          ]
+
+        include:
+          - name: "windows-py312"
+            python: "3.12"
+            node-version: 20.x
+            os: windows-latest
+          - name: "macos-py311"
+            python: "3.11"
+            os: macos-13
+          - name: "macos-py312"
+            python: "3.12"
+            node-version: 20.x
+            os: macos-13
+    env:
+      SETUPTOOLS_USE_DISTUTILS: stdlib
+      INVOKE_IS_CI_CD: 1
+      SYSTEM_VERSION_COMPAT: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip wheel setuptools
+      - name: Install invocation prerequisites
+        run: pip install -Ur requirements.txt
+      - name: Get python version
+        id: full-python-version
+        shell: bash
+        run: |
+          echo "version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info[:3]))")" >> $GITHUB_OUTPUT
+
+
