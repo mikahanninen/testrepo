@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "src/**"
-      - ".github/test.yaml"
+      - ".github/workflows/test.yaml"
       - "requirements.txt"
   workflow_dispatch:
 
